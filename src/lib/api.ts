@@ -1,7 +1,4 @@
-// Laravel API client (Sanctum compatible)
-// - Public:    POST /api/login, GET /api/videos, GET /api/videos/{video}
-// - Protected: POST /api/logout, GET /api/user, POST /api/videos, DELETE /api/videos/{video},
-//              POST /api/videos/{video}/view, POST /api/videos/{video}/like, POST /api/videos/{video}/unlike
+// These Are Unused Because Of Paradigm Shift to become no auth and ready to use by standard
 
 export type PaginationLink = {
   url: string | null;

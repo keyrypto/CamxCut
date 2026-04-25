@@ -1,8 +1,3 @@
-# PWA Implementation Summary
-
-## Overview
-This document describes the Progressive Web App (PWA) implementation for CamCut, enabling offline functionality for the app and video-related operations.
-
 ## Features Implemented
 
 ### 1. PWA Configuration

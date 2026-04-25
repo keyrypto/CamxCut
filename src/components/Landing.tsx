@@ -3,7 +3,6 @@ import {
   Type,
   Sparkles,
   ArrowRight,
-  Play,
   Video,
   Zap,
   Scissors,
@@ -107,8 +106,8 @@ export default function Landing() {
               </div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-primary font-outfit mb-4 leading-[1.1]">
-                What Microst {' '}
-                <span className="text-[var(--accent-main)]">Dont have By Default</span>
+                What Microsoft {' '}
+                <span className="text-[var(--accent-main)]">Doesn't Have, By Default</span>
               </h1>
 
               <p className="text-base sm:text-lg text-secondary mb-6 leading-relaxed">
@@ -133,24 +132,7 @@ export default function Landing() {
                   No watermarks
                 </span>
               </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-                <button
-                  onClick={() => navigate('/studio')}
-                  className="group w-full sm:w-auto px-5 py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2 text-[var(--accent-contrast)] bg-[var(--accent-main)] hover:opacity-95 shadow-theme-md transition-all duration-200 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)] focus-visible:ring-[var(--accent-main)]"
-                >
-                  <span>Open editor</span>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                </button>
-                <button
-                  onClick={() => navigate('/gallery')}
-                  className="w-full sm:w-auto bg-secondary hover:bg-tertiary text-primary border border-theme px-5 py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-theme-sm hover:shadow-theme-md active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-main)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)]"
-                >
-                  <Play className="w-4 h-4" />
-                  <span>Browse gallery</span>
-                </button>
-              </div>
-
+ 
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 text-left">
                 {[
                   { title: 'Fast workflow', desc: 'Pick → trim → style → export — all in the browser.' },

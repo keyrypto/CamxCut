@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Play, Pause, Scissors, SkipBack, SkipForward, Volume2, VolumeX, RotateCcw, Zap } from 'lucide-react';
+import { Play, Pause, Scissors, SkipBack, SkipForward, Volume2, VolumeX, RotateCcw, Zap, Check } from 'lucide-react';
 import { VideoData } from '../App';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface VideoTrimmerProps {
   videoData: VideoData;
@@ -13,9 +14,10 @@ interface TimelineMarker {
   label: string;
 }
 
-function VideoTrimmer({ videoData, onTrimComplete, onBack }: VideoTrimmerProps) {
+function VideoTrimmer({ videoData, onTrimComplete }: VideoTrimmerProps) {
+  const { settings } = useSettings();
   const [startTime, setStartTime] = useState(videoData.startTime);
-  const [endTime, setEndTime] = useState(Math.min(videoData.endTime, videoData.startTime + 6));
+  const [endTime, setEndTime] = useState(Math.min(videoData.endTime, videoData.startTime + (settings.duration === 'long' ? 30 : 6)));
   const [currentTime, setCurrentTime] = useState(videoData.startTime);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isDraggingStart, setIsDraggingStart] = useState(false);
@@ -36,8 +38,8 @@ function VideoTrimmer({ videoData, onTrimComplete, onBack }: VideoTrimmerProps) 
   const containerRef = useRef<HTMLDivElement>(null);
 
   const duration = endTime - startTime;
-  const maxDuration = 6; // Maximum clip duration
-  const minDuration = 3; // Minimum clip duration
+  const maxDuration = settings.duration === 'long' ? 300 : 6; // 5 min for long, 6s for short
+  const minDuration = settings.duration === 'long' ? 10 : 3; // 10s min for long, 3s for short
 
   // Format time display (used in generateMarkers and JSX)
   const formatTime = useCallback((time: number): string => {
@@ -247,18 +249,25 @@ function VideoTrimmer({ videoData, onTrimComplete, onBack }: VideoTrimmerProps) 
 
   const resetTrim = () => {
     setStartTime(0);
-    setEndTime(Math.min(6, videoData.duration));
+    const defaultEnd = settings.duration === 'long' ? Math.min(30, videoData.duration) : Math.min(6, videoData.duration);
+    setEndTime(defaultEnd);
     seekTo(0);
   };
 
   const setOptimalClip = () => {
-    const optimalDuration = 4; // 4 seconds is often ideal for social media
+    const optimalDuration = settings.duration === 'long' ? 30 : 4; // 30s for long, 4s for short
     const center = currentTime;
     const newStart = Math.max(0, center - optimalDuration / 2);
     const newEnd = Math.min(videoData.duration, newStart + optimalDuration);
     
     setStartTime(newStart);
     setEndTime(newEnd);
+  };
+
+  const handleContinue = () => {
+    if (duration >= minDuration && duration <= maxDuration) {
+      onTrimComplete(startTime, endTime);
+    }
   };
 
   // Calculate timeline positions
@@ -274,21 +283,36 @@ function VideoTrimmer({ videoData, onTrimComplete, onBack }: VideoTrimmerProps) 
   const endPercent = getTimelinePosition(endTime);
   const currentPercent = getTimelinePosition(currentTime);
 
+  const isValidDuration = duration >= minDuration && duration <= maxDuration;
+
   return (
-    <div className="space-y-4" ref={containerRef}>
+    <div className="space-y-4 sm:space-y-6" ref={containerRef}>
       {/* Compact header */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <Scissors className="w-5 h-5 text-primary-500 flex-shrink-0" />
+          <Scissors className="w-5 h-5 text-[var(--accent-main)] flex-shrink-0" />
           <div>
             <h2 className="text-lg font-bold text-primary font-outfit">Trim clip</h2>
-            <p className="text-xs text-secondary">Set in/out points (3–6s)</p>
+            <p className="text-xs text-secondary">
+              {settings.duration === 'short' 
+                ? 'Set in/out points (3–6s recommended)'
+                : 'Set in/out points (10s+ recommended)'}
+            </p>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={handleContinue}
+          disabled={!isValidDuration}
+          className="px-4 py-2 bg-[var(--accent-main)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-[var(--accent-contrast)] rounded-lg transition-all flex items-center gap-2 text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-main)] shadow-theme-sm"
+        >
+          <Check className="w-4 h-4" />
+          <span>Continue</span>
+        </button>
       </div>
 
       {/* Video player — compact */}
-      <div className="relative group rounded-xl overflow-hidden bg-primary border border-theme">
+      <div className="relative group rounded-xl overflow-hidden bg-primary border border-theme shadow-theme-md">
         <video
           ref={videoRef}
           src={videoData.url}
@@ -341,15 +365,41 @@ function VideoTrimmer({ videoData, onTrimComplete, onBack }: VideoTrimmerProps) 
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-semibold text-primary">Timeline</span>
-            <button type="button" onClick={() => setSnapToMarkers(!snapToMarkers)} className={`px-2 py-0.5 text-[10px] rounded ${snapToMarkers ? 'bg-primary-600 text-white' : 'bg-tertiary text-secondary border border-theme'}`}>Snap</button>
-            <button type="button" onClick={() => setShowMarkers(!showMarkers)} className={`px-2 py-0.5 text-[10px] rounded ${showMarkers ? 'bg-primary-600 text-white' : 'bg-tertiary text-secondary border border-theme'}`}>Markers</button>
+            <button 
+              type="button" 
+              onClick={() => setSnapToMarkers(!snapToMarkers)} 
+              className={`px-2 py-0.5 text-[10px] rounded transition-all ${snapToMarkers ? 'bg-[var(--accent-main)] text-[var(--accent-contrast)]' : 'bg-tertiary text-secondary border border-theme hover:border-[var(--accent-main)]/50'}`}
+            >
+              Snap
+            </button>
+            <button 
+              type="button" 
+              onClick={() => setShowMarkers(!showMarkers)} 
+              className={`px-2 py-0.5 text-[10px] rounded transition-all ${showMarkers ? 'bg-[var(--accent-main)] text-[var(--accent-contrast)]' : 'bg-tertiary text-secondary border border-theme hover:border-[var(--accent-main)]/50'}`}
+            >
+              Markers
+            </button>
             <span className="text-[10px] text-secondary">Zoom</span>
             <input type="range" min="1" max="10" step="0.5" value={zoomLevel} onChange={(e) => setZoomLevel(parseFloat(e.target.value))} className="w-14 accent-primary-500" aria-label="Timeline zoom" />
             <span className="text-[10px] text-secondary w-6">{zoomLevel}x</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <button type="button" onClick={setOptimalClip} className="px-2 py-1 bg-primary-600 hover:bg-primary-700 text-white text-[10px] rounded flex items-center gap-1"><Zap className="w-2.5 h-2.5" />4s</button>
-            <button type="button" onClick={resetTrim} className="px-2 py-1 bg-tertiary hover:bg-primary-200 dark:hover:bg-primary-800 text-primary border border-theme text-[10px] rounded flex items-center gap-1"><RotateCcw className="w-2.5 h-2.5" />Reset</button>
+            <button 
+              type="button" 
+              onClick={setOptimalClip} 
+              className="px-2 py-1 bg-[var(--accent-main)] hover:opacity-90 text-[var(--accent-contrast)] text-[10px] rounded flex items-center gap-1 transition-all shadow-theme-sm"
+            >
+              <Zap className="w-2.5 h-2.5" />
+              {settings.duration === 'short' ? '4s' : '30s'}
+            </button>
+            <button 
+              type="button" 
+              onClick={resetTrim} 
+              className="px-2 py-1 bg-tertiary hover:bg-secondary text-primary border border-theme text-[10px] rounded flex items-center gap-1 transition-all"
+            >
+              <RotateCcw className="w-2.5 h-2.5" />
+              Reset
+            </button>
           </div>
         </div>
 
@@ -373,27 +423,34 @@ function VideoTrimmer({ videoData, onTrimComplete, onBack }: VideoTrimmerProps) 
             <div key={`t-${marker.time}`} className="absolute top-0 bottom-0 w-px bg-primary-400/50 dark:bg-primary-600/50" style={{ left: `${getTimelinePosition(marker.time)}%` }} />
           ))}
           <div
-            className="absolute top-0 h-full bg-primary-500/70 dark:bg-primary-600/70 border-x border-primary-400 dark:border-primary-500"
+            className="absolute top-0 h-full bg-[var(--accent-main)]/70 border-x border-[var(--accent-main)]/50"
             style={{ left: `${Math.max(0, startPercent)}%`, right: `${Math.max(0, 100 - endPercent)}%` }}
           />
           <div className="absolute top-0 bottom-0 cursor-ew-resize z-30 flex items-center" style={{ left: `${startPercent}%` }} onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingStart(true); }}>
-            <div className="w-2.5 h-8 -translate-x-1/2 bg-primary-600 dark:bg-primary-500 rounded-sm border border-primary shadow-sm hover:scale-105 transition-transform" />
-            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] bg-primary-800 text-primary px-1 py-0.5 rounded opacity-0 hover:opacity-100 whitespace-nowrap pointer-events-none">Start {formatTime(startTime)}</span>
+            <div className="w-2.5 h-8 -translate-x-1/2 bg-[var(--accent-main)] rounded-sm border border-[var(--accent-main)]/80 shadow-theme-sm hover:scale-105 transition-transform" />
+            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] bg-primary/95 backdrop-blur-sm text-primary px-1 py-0.5 rounded opacity-0 hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity border border-theme">Start {formatTime(startTime)}</span>
           </div>
           <div className="absolute top-0 bottom-0 cursor-ew-resize z-30 flex items-center" style={{ left: `${endPercent}%` }} onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingEnd(true); }}>
-            <div className="w-2.5 h-8 -translate-x-1/2 bg-primary-600 dark:bg-primary-500 rounded-sm border border-primary shadow-sm hover:scale-105 transition-transform" />
-            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] bg-primary-800 text-primary px-1 py-0.5 rounded opacity-0 hover:opacity-100 whitespace-nowrap pointer-events-none">End {formatTime(endTime)}</span>
+            <div className="w-2.5 h-8 -translate-x-1/2 bg-[var(--accent-main)] rounded-sm border border-[var(--accent-main)]/80 shadow-theme-sm hover:scale-105 transition-transform" />
+            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] bg-primary/95 backdrop-blur-sm text-primary px-1 py-0.5 rounded opacity-0 hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity border border-theme">End {formatTime(endTime)}</span>
           </div>
           <div className="absolute top-0 bottom-0 cursor-ew-resize z-20 flex items-center" style={{ left: `${currentPercent}%` }} onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingPlayhead(true); }}>
-            <div className="w-0.5 h-full bg-primary-600 dark:bg-primary-500" />
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-primary-600 dark:bg-primary-500 rounded-full border-2 border-primary" />
-            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] bg-primary-800 text-primary px-1 py-0.5 rounded opacity-0 hover:opacity-100 whitespace-nowrap pointer-events-none">{formatTime(currentTime)}</span>
+            <div className="w-0.5 h-full bg-[var(--accent-main)]" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-[var(--accent-main)] rounded-full border-2 border-primary shadow-theme-sm" />
+            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] bg-primary/95 backdrop-blur-sm text-primary px-1 py-0.5 rounded opacity-0 hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity border border-theme">{formatTime(currentTime)}</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-1.5 text-[10px] text-secondary">
-          <span className={`font-mono font-semibold ${duration >= minDuration && duration <= maxDuration ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>Duration {formatTime(duration)}</span>
-          <span className="font-mono">{formatTime(startTime)} → {formatTime(endTime)}</span>
+        <div className="flex items-center justify-between mt-1.5 text-[10px]">
+          <span className={`font-mono font-semibold ${isValidDuration ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+            Duration {formatTime(duration)}
+            {!isValidDuration && (
+              <span className="ml-1 text-[9px]">
+                ({settings.duration === 'short' ? '3-6s' : '10s+'} required)
+              </span>
+            )}
+          </span>
+          <span className="font-mono text-secondary">{formatTime(startTime)} → {formatTime(endTime)}</span>
         </div>
       </div>
 
@@ -412,16 +469,7 @@ function VideoTrimmer({ videoData, onTrimComplete, onBack }: VideoTrimmerProps) 
           </div>
         )}
       </div>
-
-      {/* Actions */}
-      <div className="flex gap-3">
-        <button type="button" onClick={onBack} className="flex-1 px-4 py-2.5 bg-secondary hover:bg-tertiary border border-theme text-primary rounded-xl text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
-          Back
-        </button>
-        <button type="button" onClick={() => onTrimComplete(startTime, endTime)} disabled={duration < minDuration || duration > maxDuration} className="flex-1 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
-          Continue to text
-        </button>
-      </div>
+ 
     </div>
   );
 }

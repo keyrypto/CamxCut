@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Upload, Video, Zap, ArrowLeft } from 'lucide-react'; 
+import { Upload, Video, ArrowLeft } from 'lucide-react'; 
 
 interface VideoUploadProps {
   onVideoUpload: (file: File, url: string, duration: number) => void;
@@ -194,31 +194,7 @@ function VideoUpload({ onVideoUpload, onBack }: VideoUploadProps) {
           </button>
         </div>
       </div>
-
-      <div className="bg-secondary border border-theme rounded-lg p-4 sm:p-5 shadow-theme-sm">
-        <h3 className="text-primary font-semibold text-sm mb-3 flex items-center gap-2">
-          <Zap className="w-4 h-4 text-[var(--accent-main)] flex-shrink-0" />
-          Pro Tips for Best Results
-        </h3>
-        <ul className="space-y-2 text-secondary text-sm">
-            <li className="flex items-start gap-2">
-              <span className="text-[var(--accent-main)] font-semibold flex-shrink-0 text-xs">1</span>
-              <span>Supports all major video formats (MP4, WebM, AVI, MOV, MKV, etc.)</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[var(--accent-main)] font-semibold flex-shrink-0 text-xs">2</span>
-              <span>Videos must be at least 3 seconds long</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-[var(--accent-main)] font-semibold flex-shrink-0 text-xs">3</span>
-              <span>High-quality videos produce better results</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-[var(--accent-main)] font-semibold flex-shrink-0 text-xs">4</span>
-              <span>Professional trimming tools for precise editing</span>
-            </li>
-          </ul>
-        </div>
+ 
       </div>
   );
 }

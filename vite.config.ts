@@ -4,30 +4,9 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  define: { 
-    'import.meta.env.TOKEN_STATUS': JSON.stringify('prelaunch'),
-    'import.meta.env.TOKEN_CA': JSON.stringify('EBuTz34KVi94uoiggg8BuR5DFsDkiTM572AL2Qzepump'),
-  },
-  server: {
-    port: 5173,
-    // Dev-only: avoid CORS by proxying to Laravel backend
-    proxy: {
-      '/api': {
-        target: 'https://api.camcut.fun',
-        changeOrigin: true,
-      },
-      '/video': {
-        target: 'https://api.camcut.fun',
-        changeOrigin: true,
-      },
-      // If you use Sanctum CSRF cookie endpoint
-      '/sanctum': {
-        target: 'https://api.camcut.fun',
-        changeOrigin: true,
-      },
-    },
-  },
+export default defineConfig(() => { 
+  
+  return { 
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -94,7 +73,9 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,woff,woff2}'],
+        ...({
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,woff,woff2}'],
+        }),
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -188,4 +169,5 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  };
 });

@@ -10,9 +10,10 @@ interface VideoPreviewProps {
   textStyle: TextStyle;
   onBack: () => void;
   onEdit: () => void;
+  includeText?: boolean;
 }
 
-function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPreviewProps) {
+function VideoPreview({ videoData, text, textStyle, onEdit, includeText = true }: VideoPreviewProps) {
   const { settings } = useSettings();
   const [isPlaying, setIsPlaying] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -144,7 +145,9 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
       if (time >= videoData.endTime) {
         video.pause();
         setIsPlaying(false);
-        setShowText(true);
+        if (includeText && text) {
+          setShowText(true);
+        }
       } else {
         setShowText(false);
       }
@@ -152,7 +155,7 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
 
     video.addEventListener('timeupdate', handleTimeUpdate);
     return () => video.removeEventListener('timeupdate', handleTimeUpdate);
-  }, [videoData.endTime]);
+  }, [videoData.endTime, includeText, text]);
 
   const duration = videoData.endTime - videoData.startTime;
   const totalProgress = videoData.duration > 0
@@ -163,15 +166,17 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
     const video = videoRef.current;
     if (!video) return;
 
-    if (isPlaying) {
-      video.pause();
-      setIsPlaying(false);
-    } else {
-      video.currentTime = videoData.startTime;
-      setShowText(false);
-      video.play();
-      setIsPlaying(true);
-    }
+      if (isPlaying) {
+        video.pause();
+        setIsPlaying(false);
+      } else {
+        video.currentTime = videoData.startTime;
+        if (includeText && text) {
+          setShowText(false);
+        }
+        video.play();
+        setIsPlaying(true);
+      }
   };
 
   const handleExport = async () => {
@@ -230,8 +235,20 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
       }
 
       const stream = canvas.captureStream(30);
+      
+      // Determine MIME type based on format setting
+      let mimeType = 'video/webm;codecs=vp9';
+      let fileExtension = 'webm';
+      if (settings.format === 'mp4') {
+        mimeType = 'video/mp4';
+        fileExtension = 'mp4';
+      } else if (settings.format === 'mov') {
+        mimeType = 'video/quicktime';
+        fileExtension = 'mov';
+      }
+
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm;codecs=vp9',
+        mimeType,
         videoBitsPerSecond
       });
 
@@ -244,11 +261,11 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' });
+        const blob = new Blob(chunks, { type: mimeType });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `meme-clip-${Date.now()}.webm`;
+        a.download = `camcut-clip-${Date.now()}.${fileExtension}`;
         a.click();
         URL.revokeObjectURL(url);
         setIsExporting(false);
@@ -266,10 +283,11 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
         if (video.currentTime >= videoData.endTime) {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-          drawText(ctx, canvas.width, canvas.height);
+          if (includeText && text) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawText(ctx, canvas.width, canvas.height);
+          }
 
           setTimeout(() => {
             mediaRecorder.stop();
@@ -291,14 +309,16 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
     }
   };
 
+  const hasText = includeText && text && text.trim().length > 0;
+
   return (
-    <div className="space-y-4">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold text-accent-main mb-2 flex items-center justify-center gap-3">
-          <Play className="w-6 h-6 sm:w-8 sm:h-8 text-accent-main" />
+    <div className="space-y-4 sm:space-y-6">
+      <div className="text-center mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-primary font-outfit mb-2 flex items-center justify-center gap-2">
+          <Play className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--accent-main)]" />
           Preview Your Video
         </h2>
-        <p className="text-secondary text-sm sm:text-base">
+        <p className="text-secondary text-sm">
           Review your final clip before exporting
         </p>
       </div>
@@ -314,7 +334,7 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
         />
         <canvas ref={canvasRef} className="hidden" />
 
-        {showText && (
+        {showText && hasText && (
           <div className="absolute inset-0 bg-black/90 flex items-center justify-center p-6 sm:p-8 z-20">
             <div className="w-full">
               <p className={getPreviewStyle()}>
@@ -381,7 +401,7 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
         <div className="absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-3 sm:p-4">
           <div className="space-y-2">
             {/* Progress bar */}
-            <div className="relative h-2 sm:h-3 bg-gray-800/80 backdrop-blur-sm rounded-full overflow-hidden">
+            <div className="relative h-2 sm:h-2.5 bg-gray-800/80 backdrop-blur-sm rounded-full overflow-hidden">
               {/* Full video range indicator */}
               <div 
                 className="absolute inset-0 bg-gray-700/50"
@@ -392,7 +412,7 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
               />
               {/* Selected clip range */}
               <div 
-                className="absolute h-full bg-primary-500"
+                className="absolute h-full bg-[var(--accent-main)]"
                 style={{
                   left: `${(videoData.startTime / videoData.duration) * 100}%`,
                   width: `${(duration / videoData.duration) * 100}%`
@@ -400,13 +420,13 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
               />
               {/* Playhead */}
               <div 
-                className="absolute top-0 bottom-0 w-0.5 sm:w-1 bg-white rounded-full"
+                className="absolute top-0 bottom-0 w-0.5 sm:w-1 bg-white rounded-full shadow-lg"
                 style={{ left: `${totalProgress}%` }}
               />
             </div>
 
             {/* Time info */}
-            <div className="flex items-center justify-between text-xs sm:text-sm">
+            <div className="flex items-center justify-between text-xs">
               <div className="flex items-center space-x-2">
                 <span className="text-white/90 font-semibold">Clip:</span>
                 <span className="text-white/80 font-mono">
@@ -421,43 +441,68 @@ function VideoPreview({ videoData, text, textStyle, onBack, onEdit }: VideoPrevi
         </div>
       </div>
 
-      <div className="bg-secondary rounded-xl p-4 sm:p-6 border border-theme shadow-sm">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-primary font-bold mb-2 text-sm sm:text-base">Text Overlay</h3>
-            <p className="text-secondary text-base sm:text-lg mb-2 break-words">{text}</p>
-            <p className="text-tertiary text-xs sm:text-sm">
-              Style: <span className="text-primary-600 dark:text-primary-400 font-semibold capitalize">{textStyle}</span>
-            </p>
+      {/* Text Overlay Section - Only show if text is included */}
+      {hasText && (
+        <div className="bg-secondary rounded-xl p-4 sm:p-6 border border-theme shadow-theme-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-primary font-bold mb-2 text-sm sm:text-base flex items-center gap-2">
+                <span>Text Overlay</span>
+                <span className="text-xs font-normal text-secondary">({textStyle})</span>
+              </h3>
+              <p className="text-secondary text-base sm:text-lg mb-2 break-words leading-relaxed">{text}</p>
+            </div>
+            <button
+              type="button"
+              onClick={onEdit}
+              className="px-3 sm:px-4 py-2 bg-[var(--accent-main)] hover:opacity-90 text-[var(--accent-contrast)] rounded-lg transition-all flex items-center gap-2 text-sm font-semibold flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-main)] shadow-theme-sm"
+            >
+              <Edit2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Edit</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Export Section */}
+      <div className="bg-secondary rounded-xl p-4 sm:p-6 border border-theme shadow-theme-sm">
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-primary font-bold mb-3 text-sm sm:text-base">Export Settings</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+              <div className="bg-tertiary rounded-lg p-2 border border-theme">
+                <div className="text-secondary mb-1">Format</div>
+                <div className="text-primary font-semibold uppercase">{settings.format}</div>
+              </div>
+              <div className="bg-tertiary rounded-lg p-2 border border-theme">
+                <div className="text-secondary mb-1">Resolution</div>
+                <div className="text-primary font-semibold">{settings.size}</div>
+              </div>
+              <div className="bg-tertiary rounded-lg p-2 border border-theme">
+                <div className="text-secondary mb-1">Quality</div>
+                <div className="text-primary font-semibold capitalize">{settings.quality}</div>
+              </div>
+            </div>
           </div>
           <button
             type="button"
-            onClick={onEdit}
-            className="px-3 sm:px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-all flex items-center gap-2 text-sm font-semibold flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            onClick={handleExport}
+            disabled={isExporting}
+            className="w-full px-4 py-3 bg-[var(--accent-main)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-[var(--accent-contrast)] rounded-lg transition-all flex items-center justify-center gap-2 text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-main)] shadow-theme-md"
           >
-            <Edit2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Edit</span>
+            {isExporting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-[var(--accent-contrast)] border-t-transparent rounded-full animate-spin" />
+                <span>Exporting...</span>
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                <span>Export Video</span>
+              </>
+            )}
           </button>
         </div>
-      </div>
-
-      <div className="flex gap-3 sm:gap-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-secondary hover:bg-tertiary border border-theme text-primary rounded-xl transition-all font-semibold shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={isExporting}
-          className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-all font-bold shadow-lg hover:shadow-primary-500/50 flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-        >
-          <Download className="w-5 h-5" />
-          {isExporting ? 'Exporting...' : 'Download Video'}
-        </button>
       </div>
     </div>
   );

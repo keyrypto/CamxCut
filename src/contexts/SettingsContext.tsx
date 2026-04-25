@@ -3,11 +3,13 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 export type DurationPreference = 'short' | 'long';
 export type QualityPreference = 'low' | 'medium' | 'high' | 'ultra';
 export type SizePreference = '480p' | '720p' | '1080p' | '4k';
+export type FormatPreference = 'mp4' | 'webm' | 'mov';
 
 export interface Settings {
   duration: DurationPreference;
   quality: QualityPreference;
   size: SizePreference;
+  format: FormatPreference;
 }
 
 interface SettingsContextType {
@@ -20,6 +22,7 @@ const defaultSettings: Settings = {
   duration: 'short',
   quality: 'high',
   size: '1080p',
+  format: 'mp4',
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);

@@ -361,195 +361,230 @@ export const VideoEditor: React.FC<Props> = ({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4">
+    <div className="w-full max-w-4xl mx-auto space-y-5 sm:space-y-6">
       {/* Mode toggle: Easy | Advanced */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div
-          className="inline-flex rounded-xl bg-secondary border border-theme p-1"
-          role="tablist"
-          aria-label="Editor mode"
-        >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={editorMode === 'easy'}
-            aria-controls="editor-easy-panel"
-            id="editor-tab-easy"
-            onClick={() => setEditorMode('easy')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-              editorMode === 'easy'
-                ? 'bg-primary-600 text-white shadow-sm'
-                : 'text-secondary hover:bg-tertiary'
-            }`}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 via-purple-500/5 to-pink-500/5 rounded-2xl blur-xl"></div>
+        <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-1.5 border border-gray-200/50 dark:border-gray-700/50 shadow-xl shadow-gray-900/5">
+          <div
+            className="inline-flex rounded-xl bg-transparent p-1 w-full"
+            role="tablist"
+            aria-label="Editor mode"
           >
-            <Sparkles className="w-4 h-4" />
-            Easy
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={editorMode === 'advanced'}
-            aria-controls="editor-advanced-panel"
-            id="editor-tab-advanced"
-            onClick={() => setEditorMode('advanced')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-              editorMode === 'advanced'
-                ? 'bg-primary-600 text-white shadow-sm'
-                : 'text-secondary hover:bg-tertiary'
-            }`}
-          >
-            <Sliders className="w-4 h-4" />
-            Advanced
-          </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={editorMode === 'easy'}
+              aria-controls="editor-easy-panel"
+              id="editor-tab-easy"
+              onClick={() => setEditorMode('easy')}
+              className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                editorMode === 'easy'
+                  ? 'bg-gradient-to-r from-primary-600 to-purple-600 text-white shadow-lg shadow-primary-500/30 scale-105'
+                  : 'text-secondary hover:text-primary hover:bg-gray-100/50 dark:hover:bg-gray-700/50'
+              }`}
+            >
+              <Sparkles className="w-4 h-4" />
+              Easy
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={editorMode === 'advanced'}
+              aria-controls="editor-advanced-panel"
+              id="editor-tab-advanced"
+              onClick={() => setEditorMode('advanced')}
+              className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                editorMode === 'advanced'
+                  ? 'bg-gradient-to-r from-primary-600 to-purple-600 text-white shadow-lg shadow-primary-500/30 scale-105'
+                  : 'text-secondary hover:text-primary hover:bg-gray-100/50 dark:hover:bg-gray-700/50'
+              }`}
+            >
+              <Sliders className="w-4 h-4" />
+              Advanced
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Video player */}
-      <section className="bg-secondary rounded-xl border border-theme overflow-hidden" aria-label="Video preview">
-        <div className="relative aspect-video bg-primary group">
-          <video
-            ref={videoRef}
-            src={videoState.url}
-            className="w-full h-full object-contain"
-            onClick={togglePlayPause}
-            playsInline
-            muted={isMuted}
-            preload="metadata"
-            aria-label="Video playback"
-          />
-          <canvas ref={canvasRef} className="hidden" aria-hidden />
+      <section className="relative group" aria-label="Video preview">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 dark:from-black dark:via-gray-900 dark:to-black rounded-2xl blur-sm opacity-75 group-hover:opacity-100 transition-opacity"></div>
+        <div className="relative bg-gradient-to-br from-gray-900 via-black to-gray-900 dark:from-black dark:via-gray-900 dark:to-black rounded-2xl overflow-hidden border-2 border-gray-800/50 dark:border-gray-700/50 shadow-2xl">
+          <div className="relative aspect-video bg-black group">
+            <video
+              ref={videoRef}
+              src={videoState.url}
+              className="w-full h-full object-contain"
+              onClick={togglePlayPause}
+              playsInline
+              muted={isMuted}
+              preload="metadata"
+              aria-label="Video playback"
+            />
+            <canvas ref={canvasRef} className="hidden" aria-hidden />
 
-          {/* Overlay controls — always visible in advanced; hover in easy */}
-          <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity ${editorMode === 'advanced' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-            <div className="absolute bottom-3 left-3 right-3">
-              <div className="flex items-center justify-between text-white gap-2 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={togglePlayPause}
-                    className="p-2 bg-black/60 hover:bg-black/80 rounded-lg backdrop-blur-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                    aria-label={videoState.isPlaying ? 'Pause' : 'Play'}
-                  >
-                    {videoState.isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-                  </button>
-                  <button type="button" onClick={() => seekRelative(-5)} className="p-1.5 bg-black/60 hover:bg-black/80 rounded backdrop-blur-sm" aria-label="Rewind 5 seconds">
-                    <SkipBack className="w-4 h-4" />
-                  </button>
-                  <button type="button" onClick={() => seekRelative(5)} className="p-1.5 bg-black/60 hover:bg-black/80 rounded backdrop-blur-sm" aria-label="Forward 5 seconds">
-                    <SkipForward className="w-4 h-4" />
-                  </button>
-                  <span className="text-xs font-mono bg-black/60 px-2 py-1 rounded" aria-live="polite">
-                    {formatTime(videoState.currentTime)} / {formatTime(videoState.duration)}
-                  </span>
-                </div>
-                {editorMode === 'advanced' && (
+            {/* Overlay controls — always visible in advanced; hover in easy */}
+            <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300 ${editorMode === 'advanced' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+              <div className="absolute bottom-4 left-4 right-4">
+                <div className="flex items-center justify-between text-white gap-3 flex-wrap">
                   <div className="flex items-center gap-2">
-                    <select
-                      value={playbackRate}
-                      onChange={(e) => setPlaybackRate(parseFloat(e.target.value))}
-                      className="bg-black/60 text-white text-xs rounded px-2 py-1 border-0 focus:ring-2 focus:ring-white"
-                      aria-label="Playback speed"
-                    >
-                      {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2].map((x) => (
-                        <option key={x} value={x}>{x}x</option>
-                      ))}
-                    </select>
                     <button
                       type="button"
-                      onClick={() => setIsMuted(!isMuted)}
-                      className="p-2 bg-black/60 hover:bg-black/80 rounded backdrop-blur-sm"
-                      aria-label={isMuted ? 'Unmute' : 'Mute'}
+                      onClick={togglePlayPause}
+                      className="p-2.5 bg-black/70 hover:bg-black/90 rounded-xl backdrop-blur-md transition-all duration-300 hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white shadow-lg"
+                      aria-label={videoState.isPlaying ? 'Pause' : 'Play'}
                     >
-                      {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                      {videoState.isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                     </button>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value={volume}
-                      onChange={(e) => setVolume(parseFloat(e.target.value))}
-                      className="w-16 accent-primary-500"
-                      aria-label="Volume"
-                    />
+                    <button 
+                      type="button" 
+                      onClick={() => seekRelative(-5)} 
+                      className="p-2 bg-black/70 hover:bg-black/90 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-110" 
+                      aria-label="Rewind 5 seconds"
+                    >
+                      <SkipBack className="w-4 h-4" />
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => seekRelative(5)} 
+                      className="p-2 bg-black/70 hover:bg-black/90 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-110" 
+                      aria-label="Forward 5 seconds"
+                    >
+                      <SkipForward className="w-4 h-4" />
+                    </button>
+                    <span className="text-xs font-mono bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10" aria-live="polite">
+                      {formatTime(videoState.currentTime)} / {formatTime(videoState.duration)}
+                    </span>
                   </div>
-                )}
+                  {editorMode === 'advanced' && (
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={playbackRate}
+                        onChange={(e) => setPlaybackRate(parseFloat(e.target.value))}
+                        className="bg-black/70 backdrop-blur-md text-white text-xs rounded-lg px-2.5 py-1.5 border border-white/10 focus:ring-2 focus:ring-white focus:outline-none"
+                        aria-label="Playback speed"
+                      >
+                        {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2].map((x) => (
+                          <option key={x} value={x}>{x}x</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setIsMuted(!isMuted)}
+                        className="p-2 bg-black/70 hover:bg-black/90 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-110"
+                        aria-label={isMuted ? 'Unmute' : 'Mute'}
+                      >
+                        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                      </button>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={volume}
+                        onChange={(e) => setVolume(parseFloat(e.target.value))}
+                        className="w-20 accent-primary-500"
+                        aria-label="Volume"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
+
+            {!videoState.isPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center border-2 border-white/20 shadow-2xl">
+                  <Play className="w-8 h-8 sm:w-10 sm:h-10 text-white ml-1" />
+                </div>
+              </div>
+            )}
           </div>
 
-          {!videoState.isPlaying && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center">
-                <Play className="w-7 h-7 text-white ml-1" />
+          {editorMode === 'advanced' && videoMetadata.width > 0 && (
+            <div className="px-5 py-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs border-t border-gray-800/50 dark:border-gray-700/50 bg-black/30 backdrop-blur-sm">
+              <div>
+                <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase tracking-wide font-semibold">Resolution</span>
+                <div className="font-mono text-white text-sm font-bold mt-1">{videoMetadata.width}×{videoMetadata.height}</div>
+              </div>
+              <div>
+                <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase tracking-wide font-semibold">Duration</span>
+                <div className="font-mono text-white text-sm font-bold mt-1">{formatTime(videoState.duration)}</div>
+              </div>
+              <div>
+                <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase tracking-wide font-semibold">Clip</span>
+                <div className="font-mono text-white text-sm font-bold mt-1">{formatTime(trimmedDuration)}</div>
+              </div>
+              <div>
+                <span className="text-gray-400 dark:text-gray-500 text-[10px] uppercase tracking-wide font-semibold">Format</span>
+                <div className="font-mono text-white text-sm font-bold mt-1 truncate">{videoState.file?.type || '—'}</div>
               </div>
             </div>
           )}
         </div>
-
-        {editorMode === 'advanced' && videoMetadata.width > 0 && (
-          <div className="px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-secondary border-t border-theme">
-            <div><span className="text-tertiary">Resolution</span><div className="font-mono text-primary">{videoMetadata.width}×{videoMetadata.height}</div></div>
-            <div><span className="text-tertiary">Duration</span><div className="font-mono text-primary">{formatTime(videoState.duration)}</div></div>
-            <div><span className="text-tertiary">Clip</span><div className="font-mono text-primary">{formatTime(trimmedDuration)}</div></div>
-            <div><span className="text-tertiary">Format</span><div className="font-mono text-primary truncate">{videoState.file?.type || '—'}</div></div>
-          </div>
-        )}
       </section>
 
       {/* Timeline */}
-      <section className="bg-secondary rounded-xl border border-theme p-4" aria-label="Trim timeline">
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
-            <Scissors className="w-4 h-4 text-primary-500" />
-            Timeline
-          </h3>
-          <span className="text-xs text-secondary font-mono">Clip: {formatTime(trimmedDuration)}</span>
-        </div>
-        <div
-          ref={timelineRef}
-          role="group"
-          aria-label="Trim range — click to seek, drag handles to set in/out"
-          className="relative h-12 bg-tertiary rounded-lg cursor-pointer overflow-hidden border border-theme"
-          onClick={handleTimelineClick}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-200/50 via-tertiary to-primary-200/50 dark:from-primary-800/30 dark:via-tertiary dark:to-primary-800/30" />
-          <div
-            className="absolute top-0 h-full bg-primary-500/60 border-x-2 border-primary-400 dark:border-primary-600"
-            style={{
-              left: `${(videoState.startTime / videoState.duration) * 100}%`,
-              width: `${((videoState.endTime - videoState.startTime) / videoState.duration) * 100}%`,
-            }}
-          />
-          <div
-            className="absolute top-0 bottom-0 w-0.5 bg-primary-600 dark:bg-primary-500 z-20 cursor-ew-resize"
-            style={{ left: `${(videoState.currentTime / videoState.duration) * 100}%` }}
-            onMouseDown={handlePlayheadDrag}
-          >
-            <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-primary-600 dark:bg-primary-500 rounded-full border-2 border-primary" />
-          </div>
-          <div
-            className="absolute top-0 bottom-0 w-3 bg-primary-500 hover:bg-primary-600 cursor-ew-resize z-10 rounded-l"
-            style={{ left: `${(videoState.startTime / videoState.duration) * 100}%` }}
-            onMouseDown={(e) => handleTrimmerDrag(e, 'start')}
-          >
-            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] bg-primary-800 text-primary px-1.5 py-0.5 rounded opacity-0 hover:opacity-100 transition-opacity whitespace-nowrap">
-              {formatTime(videoState.startTime)}
+      <section className="relative" aria-label="Trim timeline">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 via-purple-500/5 to-pink-500/5 rounded-2xl blur-xl"></div>
+        <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-5 sm:p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-xl shadow-gray-900/5">
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <h3 className="text-base font-bold text-primary flex items-center gap-2">
+              <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500/20 to-purple-500/20 border border-primary-500/30">
+                <Scissors className="w-4 h-4 text-primary-500" />
+              </div>
+              Timeline
+            </h3>
+            <span className="text-xs text-secondary font-mono bg-gray-100/50 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600">
+              Clip: {formatTime(trimmedDuration)}
             </span>
           </div>
           <div
-            className="absolute top-0 bottom-0 w-3 bg-primary-600 hover:bg-primary-700 cursor-ew-resize z-10 rounded-r"
-            style={{ left: `calc(${(videoState.endTime / videoState.duration) * 100}% - 12px)` }}
-            onMouseDown={(e) => handleTrimmerDrag(e, 'end')}
+            ref={timelineRef}
+            role="group"
+            aria-label="Trim range — click to seek, drag handles to set in/out"
+            className="relative h-14 bg-gradient-to-br from-gray-100 to-gray-200/50 dark:from-gray-900/50 dark:to-gray-800/50 rounded-xl cursor-pointer overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-inner"
+            onClick={handleTimelineClick}
           >
-            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] bg-primary-800 text-primary px-1.5 py-0.5 rounded opacity-0 hover:opacity-100 transition-opacity whitespace-nowrap">
-              {formatTime(videoState.endTime)}
-            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-300/20 via-transparent to-primary-300/20 dark:from-primary-700/20 dark:via-transparent dark:to-primary-700/20" />
+            <div
+              className="absolute top-0 h-full bg-gradient-to-r from-primary-600 to-purple-600 border-x-2 border-primary-400 dark:border-primary-500 shadow-lg"
+              style={{
+                left: `${(videoState.startTime / videoState.duration) * 100}%`,
+                width: `${((videoState.endTime - videoState.startTime) / videoState.duration) * 100}%`,
+              }}
+            />
+            <div
+              className="absolute top-0 bottom-0 w-0.5 bg-white z-20 cursor-ew-resize shadow-lg"
+              style={{ left: `${(videoState.currentTime / videoState.duration) * 100}%` }}
+              onMouseDown={handlePlayheadDrag}
+            >
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-white rounded-full border-2 border-primary-600 shadow-lg" />
+            </div>
+            <div
+              className="absolute top-0 bottom-0 w-4 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 cursor-ew-resize z-10 rounded-l shadow-lg transition-all"
+              style={{ left: `${(videoState.startTime / videoState.duration) * 100}%` }}
+              onMouseDown={(e) => handleTrimmerDrag(e, 'start')}
+            >
+              <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] bg-gray-900 text-white px-2 py-1 rounded-lg opacity-0 hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg border border-gray-700">
+                {formatTime(videoState.startTime)}
+              </span>
+            </div>
+            <div
+              className="absolute top-0 bottom-0 w-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 cursor-ew-resize z-10 rounded-r shadow-lg transition-all"
+              style={{ left: `calc(${(videoState.endTime / videoState.duration) * 100}% - 16px)` }}
+              onMouseDown={(e) => handleTrimmerDrag(e, 'end')}
+            >
+              <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] bg-gray-900 text-white px-2 py-1 rounded-lg opacity-0 hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg border border-gray-700">
+                {formatTime(videoState.endTime)}
+              </span>
+            </div>
           </div>
-        </div>
-        <div className="flex justify-between text-[10px] text-secondary font-mono mt-1.5">
-          <span>Start {formatTime(videoState.startTime)}</span>
-          <span>End {formatTime(videoState.endTime)}</span>
+          <div className="flex justify-between text-xs text-secondary font-mono mt-3 px-1">
+            <span className="bg-gray-100/50 dark:bg-gray-700/50 px-2 py-1 rounded">Start {formatTime(videoState.startTime)}</span>
+            <span className="bg-gray-100/50 dark:bg-gray-700/50 px-2 py-1 rounded">End {formatTime(videoState.endTime)}</span>
+          </div>
         </div>
       </section>
 

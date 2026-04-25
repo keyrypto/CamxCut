@@ -2,6 +2,15 @@
 
 A free, browser-based Progressive Web App (PWA) for creating viral short-form video clips with text overlays. No signup, no watermarks, no uploads to servers—everything runs locally in your browser.
 
+![Version](https://img.shields.io/badge/version-2.3.0-blue)
+![Vite](https://img.shields.io/badge/Vite-5.4.2-646CFF?logo=vite&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.1-38B2AC?logo=tailwind-css&logoColor=white) 
+![PWA](https://img.shields.io/badge/PWA-Enabled-5A0FC8?logo=pwa&logoColor=white) 
+
+## Screenshot 
+![CamCut Screenshot](./camcut.jpeg)
+
 ## 🎬 Features
 
 ### Video Editing
@@ -42,8 +51,8 @@ A free, browser-based Progressive Web App (PWA) for creating viral short-form vi
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd CanCut
+git clone https://github.com/alihd-tech/CamCut.git
+cd CamCut
 ```
 
 2. Install dependencies:
@@ -219,16 +228,12 @@ The app can be deployed to any static hosting service:
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-[Add your license here]
-
+ 
 ## 👤 Author
 
 **Ali HD (Ali Heydari)**
-- Telegram: [@lifelongcoder](https://t.me/lifelongcoder)
-- Dev Talk: [solanam.com/dev-talk](https://solanam.com/dev-talk)
+- Telegram : [@lifelongcoder](https://t.me/lifelongcoder)
+- Github : [@alihd-tech](https://github.com/alihd-tech)
 
 ## 🙏 Acknowledgments
 
