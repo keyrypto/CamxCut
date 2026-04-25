@@ -229,23 +229,7 @@ The app can be deployed to any static hosting service:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
  
-## 👤 Author
+## Live Demo
 
-**Ali HD (Ali Heydari)**
-- Telegram : [@lifelongcoder](https://t.me/lifelongcoder)
-- Github : [@alihd-tech](https://github.com/alihd-tech)
-
-## 🙏 Acknowledgments
-
-- Built with modern web technologies
-- Inspired by the need for simple, privacy-focused video editing tools
-- PWA implementation based on Workbox and Vite PWA plugin
-
-## 📝 Version
-
-Current version: **2.3.0**
-
----
-
-**Made with ❤️ for creators who want to make content fast, free, and private.**
-
+- Preview : [Camcut.fun](https://camcut.fun)
+ 
