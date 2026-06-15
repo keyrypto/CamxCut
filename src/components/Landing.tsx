@@ -20,7 +20,7 @@ export default function Landing() {
       icon: Film,
       title: 'Pick or upload a clip',
       description:
-        'Choose from the gallery of trending clips or upload your own video. Find the perfect 3–6 second hook for Shorts, Reels, and TikTok.',
+        'Upload your own video from your device. Find the perfect 3–6 second hook for Shorts, Reels, and TikTok.',
     },
     {
       icon: Type,
@@ -40,7 +40,7 @@ export default function Landing() {
     {
       step: 1,
       label: 'Select or upload',
-      detail: 'Start from a trending clip or upload your own footage from your device.',
+      detail: 'Upload footage from your device or open a saved clip from My Videos.',
     },
     {
       step: 2,
@@ -76,7 +76,7 @@ export default function Landing() {
           applicationCategory: 'MultimediaApplication',
           operatingSystem: 'Web',
           featureList: [
-            'Video upload and gallery selection',
+            'Video upload from device',
             'Precise video trimming for short clips',
             'Text overlay with 6+ short-form styles',
             'Real-time preview in the browser',
@@ -88,9 +88,9 @@ export default function Landing() {
         type="WebSite"
         data={{
           potentialAction: {
-            '@type': 'SearchAction',
-            target: 'https://camcut.fun/gallery?search={search_term_string}',
-            'query-input': 'required name=search_term_string',
+            '@type': 'ViewAction',
+            target: 'https://camcut.fun/local-videos',
+            name: 'View My Videos',
           },
         }}
       />

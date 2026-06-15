@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon, Home, Wand2, Settings } from 'lucide-react';
+import { Sun, Moon, Home, Wand2, HardDrive, Settings } from 'lucide-react';
 import { useRouter } from '../router';
 
 export const Header: React.FC = () => {
@@ -205,6 +205,28 @@ export const Header: React.FC = () => {
                     </div>
                     <p className="mt-1 text-sm sm:text-base text-muted-foreground max-w-md">
                       Open the editing studio to cut, trim, and fine‑tune your videos.
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleNavigate('/local-videos')}
+                className="group text-left rounded-xl px-3 py-3 sm:px-4 sm:py-4 hover:bg-secondary/60 hover:border-theme/80 border border-transparent transition-all active:scale-[0.98]"
+              >
+                <div className="flex items-center gap-4 sm:gap-5">
+                  <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-secondary/80 border border-theme text-[var(--accent-main)] shadow-theme-sm transition-transform group-hover:scale-105">
+                    <HardDrive className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </div>
+                  <div>
+                    <div className="inline-flex items-baseline gap-3 text-left">
+                      <span className="h-px w-8 bg-[var(--accent-main)]/70 group-hover:w-14 transition-all" />
+                      <span className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-foreground group-hover:text-[var(--accent-main)] transition-colors">
+                        My Videos
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm sm:text-base text-muted-foreground max-w-md">
+                      Browse, play, and manage videos saved on your device.
                     </p>
                   </div>
                 </div>

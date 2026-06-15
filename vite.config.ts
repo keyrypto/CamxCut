@@ -64,10 +64,10 @@ export default defineConfig(() => {
             icons: [{ src: '/icon-192.png', sizes: '192x192' }]
           },
           {
-            name: 'Gallery',
-            short_name: 'Gallery',
-            description: 'View your created videos',
-            url: '/gallery',
+            name: 'My Videos',
+            short_name: 'Videos',
+            description: 'View and manage videos on your device',
+            url: '/local-videos',
             icons: [{ src: '/icon-192.png', sizes: '192x192' }]
           }
         ]

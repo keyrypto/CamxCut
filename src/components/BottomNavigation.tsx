@@ -1,43 +1,64 @@
-import { Home, Film, Settings } from 'lucide-react';
+import { Home, Wand2, HardDrive, Settings } from 'lucide-react';
 import { useRouter } from '../router';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
-const navItems = [
-  { path: '/', label: 'Home', icon: Home },
-  { path: '/studio', label: 'Studio', icon: Film },
-  { path: '/settings', label: 'Settings', icon: Settings },
+interface NavItem {
+  path: string;
+  label: string;
+  shortLabel: string;
+  icon: typeof Home;
+  matchPaths?: string[];
+}
+
+const navItems: NavItem[] = [
+  { path: '/', label: 'Home', shortLabel: 'Home', icon: Home },
+  {
+    path: '/local-videos',
+    label: 'Video Player',
+    shortLabel: 'Library',
+    icon: HardDrive,
+    matchPaths: ['/local-videos', '/gallery'],
+  },  
+  { path: '/studio', label: 'Studio', shortLabel: 'Studio', icon: Wand2 },
+  { path: '/settings', label: 'Settings', shortLabel: 'Settings', icon: Settings },
 ];
+
+function resolveActiveIndex(route: string): number {
+  const index = navItems.findIndex(
+    item => item.path === route || item.matchPaths?.includes(route)
+  );
+  return index >= 0 ? index : 0;
+}
 
 export default function BottomNavigation() {
   const { currentRoute, navigate } = useRouter();
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(() => resolveActiveIndex(currentRoute));
   const indicatorRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  useEffect(() => {
-    const index = navItems.findIndex(item => item.path === currentRoute);
-    setActiveIndex(index >= 0 ? index : 0);
-  }, [currentRoute]);
-
-  useEffect(() => {
+  const updateIndicator = useCallback(() => {
     const item = itemRefs.current[activeIndex];
     const indicator = indicatorRef.current;
     if (!item || !indicator || !item.parentElement) return;
 
-    const isDesktop = window.innerWidth >= 768;
     const itemRect = item.getBoundingClientRect();
     const containerRect = item.parentElement.getBoundingClientRect();
-
     const left = itemRect.left - containerRect.left;
     const width = itemRect.width;
 
     indicator.style.transform = `translateX(${left}px)`;
     indicator.style.width = `${width}px`;
-
-    // slight visual tweak for desktop vs mobile
-    indicator.style.top = isDesktop ? '6px' : '4px';
-    indicator.style.bottom = isDesktop ? '6px' : '4px';
   }, [activeIndex]);
+
+  useEffect(() => {
+    setActiveIndex(resolveActiveIndex(currentRoute));
+  }, [currentRoute]);
+
+  useEffect(() => {
+    updateIndicator();
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [updateIndicator]);
 
   const handleNav = (path: string, idx: number) => {
     if (idx === activeIndex) return;
@@ -62,86 +83,86 @@ export default function BottomNavigation() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50"
+      className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none select-none pb-4 md:pb-6"
       aria-label="Main navigation"
     >
-      <div className="mx-auto max-w-md px-4 pb-5 md:px-6 md:pt-5 md:pb-6">
-        <div className="relative bg-base-100/90 backdrop-blur-xl rounded-2xl border border-theme shadow-theme-lg">
-          {/* Indicator */}
+      <div className="mx-auto w-full max-w-[22rem] px-4 md:max-w-md pointer-events-auto">
+        <div
+          className="
+            relative flex items-center p-1.5 
+            rounded-full bg-[var(--bg-primary)]/85 backdrop-blur-xl  
+            shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
+          "
+        >
+          {/* Subtle sliding active background pill */}
           <div
             ref={indicatorRef}
-            className="absolute bg-base-200 rounded-xl transition-all duration-500 ease-out-expo shadow-sm pointer-events-none"
-            style={{ left: 0, width: 0 }}
+            className="
+              absolute top-1.5 bottom-1.5 left-0
+              rounded-full bg-[var(--text-primary)]/5
+              transition-[transform,width] duration-400 ease-[cubic-bezier(0.25,1,0.5,1)]
+            "
+            style={{ width: 0, transform: 'translateX(0)' }}
             aria-hidden
           />
 
-          <div
-            className={`
-              relative flex items-center justify-around
-              max-md:p-2 max-md:gap-1
-              md:gap-2 md:p-3
-            `}
-          >
-            {navItems.map((item, idx) => {
-              const Icon = item.icon;
-              const active = idx === activeIndex;
+          {navItems.map((item, idx) => {
+            const Icon = item.icon;
+            const active = idx === activeIndex;
 
-              return (
-                <button
-                  key={item.path}
-                  ref={el => (itemRefs.current[idx] = el)}
-                  type="button"
-                  onClick={() => handleNav(item.path, idx)}
-                  onKeyDown={e => handleKeyDown(e, item.path, idx)}
-                  aria-current={active ? 'page' : undefined}
-                  aria-label={`${item.label}${active ? ' (current)' : ''}`}
+            return (
+              <button
+                key={item.path}
+                ref={el => (itemRefs.current[idx] = el)}
+                type="button"
+                onClick={() => handleNav(item.path, idx)}
+                onKeyDown={e => handleKeyDown(e, item.path, idx)}
+                aria-current={active ? 'page' : undefined}
+                aria-label={`${item.label}${active ? ' (current)' : ''}`}
+                className={`
+                  group relative z-10 flex flex-1 flex-col items-center justify-center
+                  gap-0.5 py-1.5 px-2 rounded-full
+                  transition-colors duration-200 ease-in-out
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-main)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)]
+                  ${active ? 'cursor-default' : 'cursor-pointer active:scale-95'}
+                `}
+              >
+                <Icon
                   className={`
-                    group relative flex items-center justify-center
-                    transition-all duration-300 ease-out
-                    focus-visible:ring-2 focus-visible:ring-accent-main focus:outline-none
-                    active:scale-95
-                    max-md:flex-col max-md:flex-1 max-md:min-w-0 max-md:py-3 max-md:px-3
-                    md:gap-3 md:py-2 md:px-5 md:min-w-[110px]
-                    ${active ? 'cursor-default' : 'cursor-pointer'}
+                    transition-colors duration-300
+                    ${active 
+                      ? 'text-[var(--accent-main)]' 
+                      : 'text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)]'
+                    }
+                  `}
+                  size={20}
+                  strokeWidth={active ? 2.5 : 2}
+                  aria-hidden
+                />
+                
+                <span
+                  className={`
+                    font-outfit text-[10px] font-medium leading-none tracking-wide truncate max-w-full
+                    transition-colors duration-300
+                    ${active
+                      ? 'text-[var(--accent-main)]'
+                      : 'text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)]'
+                    }
                   `}
                 >
-                  <div
-                    className={`transition-transform duration-300 ${
-                      active ? 'scale-110' : 'group-hover:scale-105'
-                    }`}
-                  >
-                    <Icon
-                      className={`
-                        transition-colors duration-300
-                        ${active
-                          ? 'text-base-content drop-shadow-sm'
-                          : 'text-secondary group-hover:text-base-content'
-                        }
-                      `}
-                      size={active ? 26 : 24}
-                      strokeWidth={active ? 2.5 : 2}
-                      aria-hidden
-                    />
-                  </div>
-
-                  <span
-                    className={`
-                      font-medium transition-all duration-300
-                      max-md:text-xs
-                      md:text-sm
-                      ${active
-                        ? 'text-base-content drop-shadow-sm'
-                        : 'text-secondary group-hover:text-base-content'
-                      }
-                    `}
-                  >
-                    {item.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  <span className="md:hidden">{item.shortLabel}</span>
+                  <span className="hidden md:inline">{item.label}</span>
+                </span>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Safe area spacer for modern mobile devices */}
+        <div
+          className="h-[env(safe-area-inset-bottom)] min-h-[4px]"
+          aria-hidden
+        />
       </div>
     </nav>
   );

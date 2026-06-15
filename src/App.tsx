@@ -3,7 +3,6 @@ import { SettingsProvider } from './contexts/SettingsContext';
 import { Header } from './components/Header';
 import Studio from './components/Studio';
 import Landing from './components/Landing';
-import Gallery from './components/Gallery';
 import LocalVideos from './components/LocalVideos'; 
 import About from './components/About';
 import Settings from './components/Settings';
@@ -96,7 +95,7 @@ function AppContent() {
       case '/studio':
         return <Studio />;
       case '/gallery':
-        return <Gallery />;
+        return <LocalVideos openedFile={openedFile} onFileProcessed={() => setOpenedFile(null)} />;
       case '/local-videos':
         return <LocalVideos openedFile={openedFile} onFileProcessed={() => setOpenedFile(null)} />;
       case '/about':
