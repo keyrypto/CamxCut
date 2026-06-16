@@ -1,4 +1,4 @@
-import { Home, Wand2, HardDrive, Settings } from 'lucide-react';
+import { Home, HardDrive, Settings } from 'lucide-react';
 import { useRouter } from '../router';
 import { useState, useEffect, useRef, useCallback } from 'react';
 
@@ -18,8 +18,7 @@ const navItems: NavItem[] = [
     shortLabel: 'Library',
     icon: HardDrive,
     matchPaths: ['/local-videos', '/gallery'],
-  },  
-  { path: '/studio', label: 'Studio', shortLabel: 'Studio', icon: Wand2 },
+  },
   { path: '/settings', label: 'Settings', shortLabel: 'Settings', icon: Settings },
 ];
 
